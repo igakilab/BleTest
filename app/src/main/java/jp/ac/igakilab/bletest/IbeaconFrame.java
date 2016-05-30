@@ -1,5 +1,7 @@
 package jp.ac.igakilab.bletest;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
@@ -19,7 +21,7 @@ public class IbeaconFrame {
     public static IbeaconFrame parseIbeaconData(byte[] bytes){
         IbeaconFrame frame = new IbeaconFrame();
 
-        if( isIbeaconData(bytes) ) return null;
+        if( !isIbeaconData(bytes) ) return null;
 
         frame.raw = bytes;
 
@@ -70,6 +72,10 @@ public class IbeaconFrame {
         return buf.toString();
     }
 
+    public IbeaconFrame(){
+        fields = new HashMap<String, byte[]>();
+    }
+
     public String[] getKeyList(){
         return fields.keySet().toArray(new String[0]);
     }
@@ -81,7 +87,7 @@ public class IbeaconFrame {
     public int getMajor(){
         byte[] bytes = fields.get("Major");
         if( bytes != null && bytes.length >= 2 ){
-            return ByteBuffer.wrap(bytes).getInt();
+            return (bytes[0] * 256) + bytes[1];
         }else{
             return 0;
         }
@@ -90,7 +96,7 @@ public class IbeaconFrame {
     public int getMinor(){
         byte[] bytes = fields.get("Minor");
         if( bytes != null && bytes.length >= 2 ){
-            return ByteBuffer.wrap(bytes).getInt();
+            return (bytes[0] * 256) + bytes[1];
         }else{
             return 0;
         }
@@ -98,5 +104,16 @@ public class IbeaconFrame {
 
     public byte[] getUuid(){
         return fields.get("ProximityUUID");
+    }
+
+    public String toString(){
+        String[] keys = getKeyList();
+        StringBuffer buf = new StringBuffer();
+        buf.append("<<iBeacon Frame>>\n");
+        for(int i=0; i<keys.length; i++){
+            buf.append(keys[i] + ": " + byteToString(getByte(keys[i]), null));
+            if( i != keys.length - 1 ) buf.append("\n");
+        }
+        return buf.toString();
     }
 }

@@ -97,7 +97,15 @@ class ViewBluetoothDeviceInfo implements Runnable{
     public void run() {
         String deviceInfo = "[ADDR=" + device.getAddress() + ",RSSI=" + rssi + "]";
         String records = convertToHexString(scanRecord) + "(" + scanRecord.length + ")";
-        String msg = "---detected---\n" + deviceInfo + "\n" + records;
+        String msg = "---detected---\n" + deviceInfo + "\n";
+        IbeaconFrame frame = IbeaconFrame.parseIbeaconData(scanRecord);
+        if( frame != null ) {
+            msg += "UUID: " + IbeaconFrame.byteToString(frame.getUuid(), IbeaconFrame.UUID_FORMAT) + "\n";
+            msg += "Major: " + frame.getMajor() + " Minor: " + frame.getMinor() + "\n";
+            msg += "" + frame.toString();
+        }else{
+            msg += "\n cannot ibeacon parse";
+        }
         mainAct.addLogText(msg, false);
     }
     String convertToHexString(byte[] bytes) {
