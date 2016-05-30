@@ -13,72 +13,61 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
-    private BluetoothManager btm;
-    private BluetoothAdapter bta;
-    private BluetoothAdapter.LeScanCallback lesc;
-
+public class MainActivity extends AppCompatActivity
+        implements BluetoothAdapter.LeScanCallback{
+    private BleDetector detector;
+    private TextView tvStatus;
     private final Handler handler = new Handler();
+    private boolean isScanning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btm = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-        bta = btm.getAdapter();
+        detector = new BleDetector(this, this);
+        tvStatus = (TextView)this.findViewById(R.id.blestatus);
 
-        final Button bs = (Button)this.findViewById(R.id.btnstart);
-        final Button be = (Button)this.findViewById(R.id.btnstop);
-        final TextView tvs = (TextView)this.findViewById(R.id.textstatus);
-        final MainActivity actv = this;
+        addLogText(detector.getBluetoothManager().toString(), true);
+        addLogText(detector.getBluetoothAdapter().toString(), false);
 
-        setInstanceText();
-        addLogText("initialization", true);
-
-        bs.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                tvs.setText("start");
-                setInstanceText();
-                onBtnStartBleScanClicked(v);
-            }
-        });
-        be.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                tvs.setText("stop");
-                setInstanceText();
-                onBtnStopBleScanClicked(v);
-            }
-        });
-
-
-        lesc = new BluetoothAdapter.LeScanCallback(){
+        final Button bsw = (Button)findViewById(R.id.bleswitch);
+        bsw.setText("START");
+        bsw.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord){
-                String msg = "ADDRESS=" + device.getAddress() + "\nRSSI=" + rssi;
-                Log.d("BLE", msg);
-                handler.post(new Logging(msg, actv));
+            public void onClick(View v){
+                if( isScanning ){
+                    scanStop();
+                    bsw.setText("START");
+                }else{
+                    if( scanStart() ) {
+                        bsw.setText("STOP");
+                    }
+                }
             }
-        };
+        });
     }
 
-    public void onBtnStartBleScanClicked(View view){
-        bta.startLeScan(lesc);
+    public boolean scanStart(){
+        if( detector.isBluetoothEnabled() ){
+            isScanning = true;
+            detector.startLeScan();
+            tvStatus.setText("スキャン中...");
+            return true;
+        }else{
+            tvStatus.setText("Bluetoothを有効にして下さい");
+            return false;
+        }
     }
 
-    public void onBtnStopBleScanClicked(View view){
-        bta.stopLeScan(lesc);
-    }
-
-    private void setInstanceText(){
-        String str = "";
-        str += "bmanager: " + (btm != null ? btm.toString() : "null") + "\n";
-        str += "badaptor: " + (bta != null ? bta.toString() : "null");
-        ((TextView)findViewById(R.id.textinstance)).setText(str);
+    public void scanStop(){
+        isScanning = false;
+        detector.stopLeScan();
+        tvStatus.setText("停止中");
     }
 
     public void addLogText(String str, boolean refresh){
-        TextView tvl = (TextView)findViewById(R.id.textlog);
+        TextView tvl = (TextView)findViewById(R.id.output);
         String pre = tvl.getText().toString();
         if( refresh || pre.equals("") ){
             tvl.setText(str);
@@ -86,20 +75,37 @@ public class MainActivity extends AppCompatActivity {
             tvl.setText(pre + "\n" + str);
         }
     }
+
+    @Override
+    public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord){
+        handler.post(new ViewBluetoothDeviceInfo(this, device, rssi, scanRecord));
+    }
 }
 
-
-class Logging implements Runnable {
-    private String msg;
-    private MainActivity activ;
-    public Logging (String msg, MainActivity actv){
-        this.msg = msg;
-        activ = actv;
+class ViewBluetoothDeviceInfo implements Runnable{
+    private MainActivity mainAct;
+    private BluetoothDevice device;
+    private int rssi;
+    byte[] scanRecord;
+    public ViewBluetoothDeviceInfo(MainActivity a0, BluetoothDevice d0, int r0, byte[] s0){
+        mainAct = a0;
+        device = d0;
+        rssi = r0;
+        scanRecord = s0;
     }
     @Override
-    public void run(){
-        activ.addLogText(msg, false);
-        Toast.makeText(activ.getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    public void run() {
+        String deviceInfo = "[ADDR=" + device.getAddress() + ",RSSI=" + rssi + "]";
+        String records = convertToHexString(scanRecord);
+        String msg = "---detected---\n" + deviceInfo + "\n" + records;
+        mainAct.addLogText(msg, false);
+    }
+    String convertToHexString(byte[] bytes) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) {
+            buffer.append(Integer.toHexString(bytes[i] & 0xff));
+        }
+        return buffer.toString();
     }
 }
 
