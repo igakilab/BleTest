@@ -20,6 +20,9 @@ public class MainActivity extends AppCompatActivity
     private final Handler handler = new Handler();
     private boolean isScanning = false;
 
+    private TextView tvBeaconDetail;
+    private TextView tvDetectLog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,9 +30,11 @@ public class MainActivity extends AppCompatActivity
 
         detector = new BleDetector(this, this);
         tvStatus = (TextView)this.findViewById(R.id.blestatus);
+        tvDetectLog = (TextView)this.findViewById(R.id.output);
+        tvBeaconDetail = (TextView)this.findViewById(R.id.detail);
 
-        addLogText(detector.getBluetoothManager().toString(), true);
-        addLogText(detector.getBluetoothAdapter().toString(), false);
+        addLogText(tvDetectLog, detector.getBluetoothManager().toString(), true);
+        addLogText(tvDetectLog, detector.getBluetoothAdapter().toString(), false);
 
         final Button bsw = (Button)findViewById(R.id.bleswitch);
         bsw.setText("START");
@@ -66,8 +71,23 @@ public class MainActivity extends AppCompatActivity
         tvStatus.setText("停止中");
     }
 
-    public void addLogText(String str, boolean refresh){
-        TextView tvl = (TextView)findViewById(R.id.output);
+    public void detectBeacon(BluetoothDevice device, int rssi, byte[] record){
+        String log = "ADDRESS:" + device.getAddress() + " RSSI:" + rssi;
+        addLogText(tvDetectLog, log, false);
+
+        if( IbeaconFrame.isIbeaconData(record) ){
+            IbeaconFrame frame= IbeaconFrame.parseIbeaconData(record);
+            StringBuffer buf = new StringBuffer();
+            buf.append("UUID:" + IbeaconFrame.byteToString(frame.getUuid(), IbeaconFrame.UUID_FORMAT) + "\n");
+            buf.append("Major: " + frame.getMajor() + " Minor: " + frame.getMinor() + "\n");
+            buf.append(frame.toString());
+            tvBeaconDetail.setText(buf.toString());
+        }else {
+            tvBeaconDetail.setText("cannot parse ibeacon data");
+        }
+    }
+
+    public void addLogText(TextView tvl, String str, boolean refresh){
         String pre = tvl.getText().toString();
         if( refresh || pre.equals("") ){
             tvl.setText(str);
@@ -95,25 +115,7 @@ class ViewBluetoothDeviceInfo implements Runnable{
     }
     @Override
     public void run() {
-        String deviceInfo = "[ADDR=" + device.getAddress() + ",RSSI=" + rssi + "]";
-        String records = convertToHexString(scanRecord) + "(" + scanRecord.length + ")";
-        String msg = "---detected---\n" + deviceInfo + "\n";
-        IbeaconFrame frame = IbeaconFrame.parseIbeaconData(scanRecord);
-        if( frame != null ) {
-            msg += "UUID: " + IbeaconFrame.byteToString(frame.getUuid(), IbeaconFrame.UUID_FORMAT) + "\n";
-            msg += "Major: " + frame.getMajor() + " Minor: " + frame.getMinor() + "\n";
-            msg += "" + frame.toString();
-        }else{
-            msg += "\n cannot ibeacon parse";
-        }
-        mainAct.addLogText(msg, false);
-    }
-    String convertToHexString(byte[] bytes) {
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            buffer.append(String.format("%02x", bytes[i] & 0xff));
-        }
-        return buffer.toString();
+        mainAct.detectBeacon(device, rssi, scanRecord);
     }
 }
 
