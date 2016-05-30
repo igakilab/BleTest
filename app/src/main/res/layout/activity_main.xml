@@ -9,8 +9,41 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="jp.ac.igakilab.bletest.MainActivity">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start"
+        android:id="@+id/btnstart"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="stop"
+        android:id="@+id/btnstop"
+        android:layout_below="@+id/btnstart"
+        android:layout_centerHorizontal="true" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="init"
+        android:id="@+id/textstatus"
+        android:layout_below="@+id/btnstop"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textstatus"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/textlog" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textinstance"
+        android:layout_below="@+id/textlog"
+        android:layout_alignEnd="@+id/textstatus" />
 </RelativeLayout>
