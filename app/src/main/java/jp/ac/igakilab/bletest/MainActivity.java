@@ -96,14 +96,14 @@ class ViewBluetoothDeviceInfo implements Runnable{
     @Override
     public void run() {
         String deviceInfo = "[ADDR=" + device.getAddress() + ",RSSI=" + rssi + "]";
-        String records = convertToHexString(scanRecord);
+        String records = convertToHexString(scanRecord) + "(" + scanRecord.length + ")";
         String msg = "---detected---\n" + deviceInfo + "\n" + records;
         mainAct.addLogText(msg, false);
     }
     String convertToHexString(byte[] bytes) {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < bytes.length; i++) {
-            buffer.append(Integer.toHexString(bytes[i] & 0xff));
+            buffer.append(String.format("%02x", bytes[i] & 0xff));
         }
         return buffer.toString();
     }
