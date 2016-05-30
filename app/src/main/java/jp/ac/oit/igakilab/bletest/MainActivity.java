@@ -1,17 +1,13 @@
-package jp.ac.igakilab.bletest;
+package jp.ac.oit.igakilab.bletest;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements BluetoothAdapter.LeScanCallback{
@@ -118,4 +114,3 @@ class ViewBluetoothDeviceInfo implements Runnable{
         mainAct.detectBeacon(device, rssi, scanRecord);
     }
 }
-

@@ -1,12 +1,9 @@
-package jp.ac.igakilab.bletest;
+package jp.ac.oit.igakilab.bletest;
 
-import android.util.Log;
-
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 /**
- * Created by Ryokun on 2016/05/30.
+ * Created by 崇晃 on 2016/05/30.
  */
 public class IbeaconFrame {
     public static int[] UUID_FORMAT = {4, 6, 8, 10};

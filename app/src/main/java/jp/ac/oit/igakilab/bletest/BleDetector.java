@@ -1,4 +1,4 @@
-package jp.ac.igakilab.bletest;
+package jp.ac.oit.igakilab.bletest;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 
 /**
- * Created by Ryokun on 2016/05/30.
+ * Created by 崇晃 on 2016/05/30.
  */
 public class BleDetector {
     private BluetoothManager bmanager;

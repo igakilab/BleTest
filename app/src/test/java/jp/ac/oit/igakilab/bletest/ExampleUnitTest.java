@@ -1,4 +1,4 @@
-package jp.ac.igakilab.bletest;
+package jp.ac.oit.igakilab.bletest;
 
 import org.junit.Test;
 
