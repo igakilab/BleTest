@@ -3,10 +3,12 @@ package jp.ac.oit.igakilab.bletest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
@@ -16,8 +18,14 @@ public class MainActivity extends AppCompatActivity
     private final Handler handler = new Handler();
     private boolean isScanning = false;
 
-    private TextView tvBeaconDetail;
     private TextView tvDetectLog;
+    private TextView tvBeaconInfo;
+    private ImageView ivDroidIcon;
+
+    private IbeaconFrame recentBeacon;
+
+    private int[] icons = {R.drawable.droid_front, R.drawable.droid_left,
+            R.drawable.droid_back, R.drawable.droid_right};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +35,8 @@ public class MainActivity extends AppCompatActivity
         detector = new BleDetector(this, this);
         tvStatus = (TextView)this.findViewById(R.id.blestatus);
         tvDetectLog = (TextView)this.findViewById(R.id.output);
-        tvBeaconDetail = (TextView)this.findViewById(R.id.detail);
+        tvBeaconInfo = (TextView)this.findViewById(R.id.beaconinfo);
+        ivDroidIcon = (ImageView)this.findViewById(R.id.droidicon);
 
         addLogText(tvDetectLog, detector.getBluetoothManager().toString(), true);
         addLogText(tvDetectLog, detector.getBluetoothAdapter().toString(), false);
@@ -45,6 +54,15 @@ public class MainActivity extends AppCompatActivity
                         bsw.setText("STOP");
                     }
                 }
+            }
+        });
+
+        final Button bbd = (Button)findViewById(R.id.detailbtn);
+        bbd.setText("Detail");
+        bbd.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                showBeaconDetail();
             }
         });
     }
@@ -72,15 +90,27 @@ public class MainActivity extends AppCompatActivity
         addLogText(tvDetectLog, log, false);
 
         if( IbeaconFrame.isIbeaconData(record) ){
-            IbeaconFrame frame= IbeaconFrame.parseIbeaconData(record);
-            StringBuffer buf = new StringBuffer();
-            buf.append("UUID:" + IbeaconFrame.byteToString(frame.getUuid(), IbeaconFrame.UUID_FORMAT) + "\n");
-            buf.append("Major: " + frame.getMajor() + " Minor: " + frame.getMinor() + "\n");
-            buf.append(frame.toString());
-            tvBeaconDetail.setText(buf.toString());
-        }else {
-            tvBeaconDetail.setText("cannot parse ibeacon data");
+            recentBeacon = IbeaconFrame.parseIbeaconData(record);
+            //showBeaconDetail();
+            tvBeaconInfo.setText(
+                    "UUID: " + IbeaconFrame.byteToString(recentBeacon.getUuid(), IbeaconFrame.UUID_FORMAT) + "\n" +
+                            "Major: " + recentBeacon.getMajor() + ", Minor: " + recentBeacon.getMinor()
+            );
+
+            ivDroidIcon.setImageResource(icons[recentBeacon.getMinor() % icons.length]);
         }
+    }
+
+    public void showBeaconDetail(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("BeaconDetail");
+        if( recentBeacon != null ){
+            builder.setMessage(recentBeacon.toString());
+        }else{
+            builder.setMessage("beacon not detected");
+        }
+        builder.setPositiveButton("OK", null);
+        builder.show();
     }
 
     public void addLogText(TextView tvl, String str, boolean refresh){

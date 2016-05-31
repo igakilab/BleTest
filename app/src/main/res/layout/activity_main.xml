@@ -10,12 +10,11 @@
     tools:context="jp.ac.oit.igakilab.bletest.MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="logview"
         android:id="@+id/output"
-        android:layout_below="@+id/tableLayout"
-        android:layout_alignStart="@+id/tableLayout"
+        android:layout_below="@+id/detailbtn"
         android:layout_alignParentEnd="true" />
 
     <TableLayout
@@ -41,14 +40,33 @@
                 android:id="@+id/blestatus"
                 android:layout_column="1" />
         </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/droidicon"
+                android:src="@drawable/star"
+                android:layout_column="0" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BeaconInfo"
+                android:id="@+id/beaconinfo"
+                android:layout_column="1"/>
+        </TableRow>
     </TableLayout>
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/detail"
-        android:layout_below="@+id/output"
-        android:layout_alignParentStart="true"
+        android:text="Detail"
+        android:id="@+id/detailbtn"
+        android:layout_below="@+id/tableLayout"
         android:layout_alignParentEnd="true" />
+
 </RelativeLayout>
